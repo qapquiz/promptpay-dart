@@ -1,7 +1,7 @@
 name: promptpay
 description: This is for generate promptpay QR data. support e-wallet | identity/tax | phone number
-version: 1.0.1
-homepage: https://aboutme.warpgate.dev
+version: 1.0.2
+homepage: https://github.com/qapquiz/promptpay-dart 
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
