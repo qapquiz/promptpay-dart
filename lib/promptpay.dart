@@ -38,7 +38,7 @@ enum TargetAccount { phone, identityNumber, eWallet }
 /// A PromptPay is a payment method in Thailand
 class PromptPay {
   /// Returns [QR Code Data] for PromptPay QR code
-  static String generateQRData(String target, double amount) {
+  static String generateQRData(String target, {double amount}) {
     TargetAccount targetAccount = target.length >= 15
         ? (TargetAccount.eWallet)
         : target.length >= 13
@@ -66,15 +66,21 @@ class PromptPay {
       currencyID,
       currencyLength,
       bahtCurrencyData,
-      amountID,
-      _formatAmount(amount).length.toString().padLeft(2, '0'),
-      _formatAmount(amount),
-      checksumID,
-      checksumLength
     ];
 
-    var checksum =
-        _getCrc16XMODEM().convert(utf8.encode(data.join())).toRadixString(16);
+    if (amount != null) {
+      data.add(amountID);
+      data.add(_formatAmount(amount).length.toString().padLeft(2, '0'));
+      data.add(_formatAmount(amount));
+    }
+
+    data.add(checksumID);
+    data.add(checksumLength);
+
+    var checksum = _getCrc16XMODEM()
+        .convert(utf8.encode(data.join()))
+        .toRadixString(16)
+        .toUpperCase();
 
     return data.join() + checksum;
   }
