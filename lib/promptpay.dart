@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:crclib/crclib.dart';
+import 'package:either_option/either_option.dart';
 
 const versionID = "00";
 const qrTypeID = "01";
@@ -33,17 +34,17 @@ const applicationIDData = "A000000677010111";
 const countryData = "TH";
 const bahtCurrencyData = "764";
 
-enum TargetAccount { phone, identityNumber, eWallet }
+enum AccountType { phone, identityNumber, eWallet }
 
 /// A PromptPay is a payment method in Thailand
 class PromptPay {
   /// Returns [QR Code Data] for PromptPay QR code
   static String generateQRData(String target, {double amount}) {
-    TargetAccount targetAccount = target.length >= 15
-        ? (TargetAccount.eWallet)
+    AccountType accountType = target.length >= 15
+        ? (AccountType.eWallet)
         : target.length >= 13
-            ? (TargetAccount.identityNumber)
-            : (TargetAccount.phone);
+            ? (AccountType.identityNumber)
+            : (AccountType.phone);
 
     var data = [
       versionID,
@@ -57,9 +58,9 @@ class PromptPay {
       subMerchantApplicationID,
       subMerchantApplicationIDLength,
       applicationIDData,
-      _getAccountID(targetAccount),
-      _getAccountLength(targetAccount, target),
-      _formatAccount(targetAccount, target),
+      _getAccountID(accountType),
+      _getAccountLength(accountType, target),
+      _formatAccount(accountType, target),
       countryID,
       countryLength,
       countryData,
@@ -85,33 +86,56 @@ class PromptPay {
     return data.join() + checksum;
   }
 
-  static String _getAccountID(TargetAccount targetAccount) {
-    switch (targetAccount) {
-      case TargetAccount.eWallet:
+  static Option<String> getAccountNumberFromQRData(String qrData) {
+    final indexOfStartApplicationData = qrData.indexOf(applicationIDData);
+    if (indexOfStartApplicationData == -1) {
+      return Option.empty<String>();
+    }
+
+    final indexOfStartAccountType = indexOfStartApplicationData + applicationIDData.length;
+    
+    final accountTypeString = qrData.substring(indexOfStartAccountType, indexOfStartAccountType + 2);
+
+    // final accountType = accountTypeString == "01"
+    //   ? AccountType.phone : accountTypeString == "02"
+    //   ? AccountType.identityNumber : AccountType.eWallet;
+
+    final indexOfStartAccountLength = indexOfStartAccountType + 2;
+    final accountLength = int.parse(qrData.substring(indexOfStartAccountLength, indexOfStartAccountLength + 2));
+
+    final indexOfStartAccountData = indexOfStartAccountLength + 2;
+    final accountData = qrData.substring(indexOfStartAccountData, indexOfStartAccountData + accountLength);
+    
+    return Option.of(accountData);
+  }
+
+  static String _getAccountID(AccountType accountType) {
+    switch (accountType) {
+      case AccountType.eWallet:
         return subMerchantAccountEWalletID;
-      case TargetAccount.identityNumber:
+      case AccountType.identityNumber:
         return subMerchantAccountIdentityID;
       default:
         return subMerchantAccountPhoneID;
     }
   }
 
-  static String _getAccountLength(TargetAccount targetAccount, String target) {
-    switch (targetAccount) {
-      case TargetAccount.eWallet:
+  static String _getAccountLength(AccountType accountType, String target) {
+    switch (accountType) {
+      case AccountType.eWallet:
         return target.length.toString();
-      case TargetAccount.identityNumber:
+      case AccountType.identityNumber:
         return target.length.toString();
       default:
         return ("0066" + target.substring(1, target.length)).length.toString();
     }
   }
 
-  static String _formatAccount(TargetAccount targetAccount, String target) {
-    switch (targetAccount) {
-      case TargetAccount.eWallet:
+  static String _formatAccount(AccountType accountType, String target) {
+    switch (accountType) {
+      case AccountType.eWallet:
         return target;
-      case TargetAccount.identityNumber:
+      case AccountType.identityNumber:
         return target;
       default:
         return "0066" + target.substring(1, target.length);

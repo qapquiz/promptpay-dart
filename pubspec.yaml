@@ -1,6 +1,6 @@
 name: promptpay
 description: This is for generate promptpay QR data. support e-wallet | identity/tax | phone number
-version: 1.1.0
+version: 1.2.0
 homepage: https://github.com/qapquiz/promptpay-dart 
 
 environment:
@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   crclib: ^1.0.1
+  either_option: ^1.0.5
 
 dev_dependencies:
   flutter_test:
