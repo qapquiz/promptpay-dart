@@ -1,3 +1,6 @@
+## [1.2.1] - 20202 March 13
+- fix: wrong typo in example
+
 ## [1.2.0] - 2020 March 13
 - add getAccountNumberFromQRData(String qrData)
 
