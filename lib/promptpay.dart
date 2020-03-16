@@ -5,6 +5,7 @@ import 'dart:core';
 
 import 'package:crclib/crclib.dart';
 import 'package:either_option/either_option.dart';
+import 'package:promptpay/promptpay_data.dart';
 
 const versionID = "00";
 const qrTypeID = "01";
@@ -86,27 +87,54 @@ class PromptPay {
     return data.join() + checksum;
   }
 
-  static Option<String> getAccountNumberFromQRData(String qrData) {
-    final indexOfStartApplicationData = qrData.indexOf(applicationIDData);
-    if (indexOfStartApplicationData == -1) {
-      return Option.empty<String>();
+  static String getPromptPayQRWithNewAmount(String qrData, double amount) {
+    Iterable<PromptPayField> data = PromptPayData.fromQRData(qrData).asIterable();
+    var amountData = amountID + _formatAmount(amount).length.toString().padLeft(2, '0') + _formatAmount(amount);
+    var isAlreadyAddAmount = false;
+    var newQRData = data.fold("", (qrData, element) {
+      if (element != null && element.typeID == amountID) {
+        isAlreadyAddAmount = true;
+        return qrData + amountData;
+      }
+
+      if (element != null) {
+        return qrData + element.typeID + element.length.toString().padLeft(2, '0') + element.data;
+      }
+
+      return qrData;
+    });
+
+    if (!isAlreadyAddAmount) {
+      newQRData = newQRData + amountData;
     }
 
-    final indexOfStartAccountType = indexOfStartApplicationData + applicationIDData.length;
-    
-    final accountTypeString = qrData.substring(indexOfStartAccountType, indexOfStartAccountType + 2);
+    newQRData = newQRData + checksumID + checksumLength;
 
-    // final accountType = accountTypeString == "01"
-    //   ? AccountType.phone : accountTypeString == "02"
-    //   ? AccountType.identityNumber : AccountType.eWallet;
+    return newQRData + _getCrc16XMODEM().convert(utf8.encode(newQRData)).toRadixString(16).toUpperCase();
+  }
 
-    final indexOfStartAccountLength = indexOfStartAccountType + 2;
-    final accountLength = int.parse(qrData.substring(indexOfStartAccountLength, indexOfStartAccountLength + 2));
+  static Option<String> getAccountNumberFromQRData(String qrData) {
+    var promptPayData = PromptPayData.fromQRData(qrData);
 
-    final indexOfStartAccountData = indexOfStartAccountLength + 2;
-    final accountData = qrData.substring(indexOfStartAccountData, indexOfStartAccountData + accountLength);
-    
-    return Option.of(accountData);
+    if (promptPayData.transferring != null) {
+      if (promptPayData.transferringPhoneNumber != null) {
+        return Option.of(promptPayData.transferringPhoneNumber.data);
+      }
+
+      if (promptPayData.transferringIdentityNumber != null) {
+        return Option.of(promptPayData.transferringIdentityNumber.data);
+      }
+
+      if (promptPayData.transferringEWallet != null) {
+        return Option.of(promptPayData.transferringEWallet.data);
+      }
+    }
+
+    if (promptPayData.billing != null) {
+      return Option.of(promptPayData.billingID.data);
+    }
+
+    return Option.empty();
   }
 
   static String _getAccountID(AccountType accountType) {

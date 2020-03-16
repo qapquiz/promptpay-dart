@@ -1,4 +1,10 @@
-## [1.2.1] - 20202 March 13
+## [1.3.0] - 2020 March 16
+### Features
+- feat: can change amount of existing qr code
+### Fix
+- fix: get account number can extract merchant id
+
+## [1.2.1] - 2020 March 13
 - fix: wrong typo in example
 
 ## [1.2.0] - 2020 March 13

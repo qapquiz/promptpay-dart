@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:either_option/either_option.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'dart:core';
 import 'package:promptpay/promptpay.dart';
+import 'package:promptpay/promptpay_data.dart';
 
 void main() {
   test('toString 3 must be 03', () {
@@ -21,6 +24,7 @@ void main() {
   test('should generate promptpay data for e-wallet correctly', () {
     expect(PromptPay.generateQRData("000000000000000", amount: 123.45), "00020101021129370016A00000067701011103150000000000000005802TH53037645406123.456304AE16");
   });
+
 
   test('extract qrcode from qr data', () {
     final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";
@@ -57,5 +61,21 @@ void main() {
   test('extract qrcode from qr data with function', () {
     final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";
     expect(PromptPay.getAccountNumberFromQRData(qrData), Option.of("0066812345678"));
+  });
+
+  test('test promptpay constructor', () {
+    final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";
+    var promptPayData = PromptPayData.fromQRData(qrData);
+    expect(promptPayData.emvcoVersion.type, PromptPayFieldType.EMVCoVersion);
+    expect(promptPayData.emvcoVersion.length, 2);
+    expect(promptPayData.emvcoVersion.data, "01");
+    
+    expect(promptPayData.qrType.type, PromptPayFieldType.qrType);
+    expect(promptPayData.qrType.length, 2);
+    expect(promptPayData.qrType.data, "11");
+
+    expect(promptPayData.transferring.type, PromptPayFieldType.transferring);
+    expect(promptPayData.transferring.length, 37);
+    expect(promptPayData.transferring.data, "0016A00000067701011101130066812345678");
   });
 }
