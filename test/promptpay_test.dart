@@ -18,13 +18,27 @@ void main() {
     expect(PromptPay.generateQRData("0812345678", amount: 123.45), "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045");
   });
   test('should generate promptpay data for identity correctly', () {
-    expect(PromptPay.generateQRData("0000000000000", amount: 123.45), "00020101021129370016A000000677010111021300000000000005802TH53037645406123.4563046DCC");
+    expect(PromptPay.generateQRData("1100599000373", amount: 123.45), "00020101021129370016A000000677010111021300000000000005802TH53037645406123.4563046DCC");
   });
 
   test('should generate promptpay data for e-wallet correctly', () {
     expect(PromptPay.generateQRData("000000000000000", amount: 123.45), "00020101021129370016A00000067701011103150000000000000005802TH53037645406123.456304AE16");
   });
 
+  test('qr data should be valid', () {
+    final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";
+    expect(PromptPay.isQRDataValid(qrData), true);
+  });
+
+  test('it is not qr data should not be valid', () {
+    final notQRData = "31902380129830197401412890841209";
+    expect(PromptPay.isQRDataValid(notQRData), false);
+  });
+
+  test('it is not qr data because length < 8', () {
+    final notQRData = "1231356";
+    expect(PromptPay.isQRDataValid(notQRData), false);
+  });
 
   test('extract qrcode from qr data', () {
     final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";

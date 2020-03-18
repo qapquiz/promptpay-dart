@@ -147,6 +147,21 @@ class PromptPay {
     return Option.empty();
   }
 
+  static bool isQRDataValid(String qrData) {
+    if (qrData.length < 8) {
+      return false;
+    }
+
+    final qrDataWithOutChecksum = qrData.substring(0, qrData.length - 4);
+    final checksum = qrData.substring(qrData.length - 4, qrData.length);
+    final newChecksum = _getCrc16XMODEM()
+        .convert(utf8.encode(qrDataWithOutChecksum))
+        .toRadixString(16)
+        .toUpperCase();
+
+    return newChecksum == checksum;
+  }
+
   static String _getAccountID(AccountType accountType) {
     switch (accountType) {
       case AccountType.eWallet:

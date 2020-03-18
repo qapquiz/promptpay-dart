@@ -1,3 +1,7 @@
+## [1.4.0] - 2020 March 18
+### Features
+- feat: add isQRDataValid() to check is this QR PromptPay
+
 ## [1.3.1] - 2020 March 18
 - format file with `flutter format`
 
