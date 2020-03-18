@@ -88,8 +88,11 @@ class PromptPay {
   }
 
   static String getPromptPayQRWithNewAmount(String qrData, double amount) {
-    Iterable<PromptPayField> data = PromptPayData.fromQRData(qrData).asIterable();
-    var amountData = amountID + _formatAmount(amount).length.toString().padLeft(2, '0') + _formatAmount(amount);
+    Iterable<PromptPayField> data =
+        PromptPayData.fromQRData(qrData).asIterable();
+    var amountData = amountID +
+        _formatAmount(amount).length.toString().padLeft(2, '0') +
+        _formatAmount(amount);
     var isAlreadyAddAmount = false;
     var newQRData = data.fold("", (qrData, element) {
       if (element != null && element.typeID == amountID) {
@@ -98,7 +101,10 @@ class PromptPay {
       }
 
       if (element != null) {
-        return qrData + element.typeID + element.length.toString().padLeft(2, '0') + element.data;
+        return qrData +
+            element.typeID +
+            element.length.toString().padLeft(2, '0') +
+            element.data;
       }
 
       return qrData;
@@ -110,7 +116,11 @@ class PromptPay {
 
     newQRData = newQRData + checksumID + checksumLength;
 
-    return newQRData + _getCrc16XMODEM().convert(utf8.encode(newQRData)).toRadixString(16).toUpperCase();
+    return newQRData +
+        _getCrc16XMODEM()
+            .convert(utf8.encode(newQRData))
+            .toRadixString(16)
+            .toUpperCase();
   }
 
   static Option<String> getAccountNumberFromQRData(String qrData) {
