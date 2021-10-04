@@ -43,12 +43,12 @@ void main() {
   test('extract qrcode from qr data', () {
     final qrData = "00020101021129370016A000000677010111011300668123456785802TH53037645406123.4563043045";
     final indexOfStartApplicationData = qrData.indexOf(applicationIDData);
-    
+
     expect(indexOfStartApplicationData, 20);
     expect(qrData[indexOfStartApplicationData], "A");
 
     final indexOfStartAccountType = indexOfStartApplicationData + applicationIDData.length;
-    
+
     expect(indexOfStartAccountType, 36);
 
     final accountTypeString = qrData.substring(indexOfStartAccountType, indexOfStartAccountType + 2);
@@ -83,7 +83,7 @@ void main() {
     expect(promptPayData.emvcoVersion.type, PromptPayFieldType.EMVCoVersion);
     expect(promptPayData.emvcoVersion.length, 2);
     expect(promptPayData.emvcoVersion.data, "01");
-    
+
     expect(promptPayData.qrType.type, PromptPayFieldType.qrType);
     expect(promptPayData.qrType.length, 2);
     expect(promptPayData.qrType.data, "11");
